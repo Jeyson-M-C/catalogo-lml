@@ -3,6 +3,7 @@ from fastapi import FastAPI, APIRouter, HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.middleware.cors import CORSMiddleware
 import os
+from dotenv import load_dotenv
 from fastapi.encoders import jsonable_encoder
 from config import db
 from models import Categoria, Enlace, User
@@ -31,7 +32,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Configuración del superadmin por defecto
 DEFAULT_SUPERADMIN_USERNAME = "admin"
-DEFAULT_SUPERADMIN_PASSWORD = os.getenv("DEFAULT_SUPERADMIN_PASSWORD", "admin/$123$/77/ADMIN")
+DEFAULT_SUPERADMIN_PASSWORD = os.getenv("PASS_ADMIN")
 
 async def crear_superadmin_por_defecto(db):
     # Verificar si ya existe un superadmin por defecto
@@ -133,7 +134,7 @@ async def verificar_password(username: str, password_ingresada: str) -> bool:
 async def crear_categoria(categoria: Categoria):
     result = await db["categorias"].insert_one(categoria.dict())
     return {"mensaje": "Categoría creada con éxito"}
-    
+
 @app.put("/categorias/{categoria_id}")
 async def actualizar_categoria(categoria_id: str, categoria: Categoria):
     try:
