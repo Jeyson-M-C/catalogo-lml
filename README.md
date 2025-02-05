@@ -11,8 +11,6 @@ Una aplicación web que permite a los usuarios gestionar un catálogo de enlaces
 - [Instalación](#instalación)
 - [Uso](#uso)
 - [API](#api)
-- [Contribución](#contribución)
-- [Licencia](#licencia)
 
 ## Características
 
