@@ -1,6 +1,11 @@
+import os
 from motor.motor_asyncio import AsyncIOMotorClient 
-MONGO_URI = 'mongodb+srv://lmenslmental:K16agEJDVz98j9qY@catalogo-lml.qpeit.mongodb.net/'
-MONGO_DB = 'catalogo-lml'
+from dotenv import load_dotenv
+
+load_dotenv()
+
+MONGO_URI = os.getenv("MONGO_URI")
+MONGO_DB = os.getenv("MONGO_DB")
 
 client = AsyncIOMotorClient(MONGO_URI)
 db = client[MONGO_DB]
