@@ -25,7 +25,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+@app.get("/")
+def read_root():
+    return {"message": "¡Hola, mundo!"}
 
 # Configura un contexto de hash
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
