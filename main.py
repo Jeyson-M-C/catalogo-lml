@@ -14,7 +14,8 @@ from bson import ObjectId
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000",  # URL del frontend
+    "http://localhost:3000",
+    'https://catalogo-lml.vercel.app' # URL del frontend
 ]
 
 app.add_middleware(
