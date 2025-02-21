@@ -132,6 +132,10 @@ async def verificar_password(username: str, password_ingresada: str) -> bool:
     return pwd_context.verify(password_ingresada, user['password'])
 
 
+# Función auxiliar para validar ObjectId
+def is_valid_objectid(id_str: str) -> bool:
+    return ObjectId.is_valid(id_str)
+
 # Rutas de categorías
 @app.post("/categorias/")
 async def crear_categoria(categoria: Categoria):
@@ -277,7 +281,7 @@ async def actualizar_enlace(enlace_id: str, enlace: Enlace):
                 "titulo": enlace_actualizado["titulo"],
                 "url": enlace_actualizado["url"],
                 "descripcion": enlace_actualizado["descripcion"],
-                "categoria_id": str(enlace_actualizado["categoria_id"])
+                "categoria_id": str(enlace_actualizado["categoria_id"])  # Asegurarse de que esté como ObjectId en la respuesta
             }
         }
 
@@ -363,7 +367,6 @@ async def obtener_subenlaces(enlace_id: str):
         ]
     }
 
-# Ruta para actualizar un subenlace
 @app.put("/subenlaces/{subenlace_id}")
 async def actualizar_subenlace(subenlace_id: str, subenlace: Subenlace):
     try:
@@ -372,8 +375,12 @@ async def actualizar_subenlace(subenlace_id: str, subenlace: Subenlace):
 
         subenlace_id = ObjectId(subenlace_id)
 
+        # Asegúrate de que el enlace_id se guarde como ObjectId
+        enlace_id_obj = ObjectId(subenlace.enlace_id)
+
         # Filtrar solo los campos proporcionados
         update_data = {k: v for k, v in subenlace.dict().items() if v is not None}
+        update_data["enlace_id"] = enlace_id_obj  # Convertir a ObjectId
 
         # Actualizar el subenlace en la base de datos
         result = await db["subenlaces"].update_one(
@@ -394,7 +401,7 @@ async def actualizar_subenlace(subenlace_id: str, subenlace: Subenlace):
                 "titulo": subenlace_actualizado["titulo"],
                 "url": subenlace_actualizado["url"],
                 "descripcion": subenlace_actualizado["descripcion"],
-                "enlace_id": str(subenlace_actualizado["enlace_id"])
+                "enlace_id": str(subenlace_actualizado["enlace_id"])  # Asegúrate de que esté como ObjectId en la respuesta
             }
         }
 
