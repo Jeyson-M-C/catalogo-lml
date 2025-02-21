@@ -6,7 +6,7 @@ import os
 from dotenv import load_dotenv
 from fastapi.encoders import jsonable_encoder
 from config import db
-from models import Categoria, Enlace, User
+from models import Categoria, Enlace, User, Subenlace
 from passlib.context import CryptContext
 from typing import Dict
 from bson import ObjectId
@@ -307,3 +307,97 @@ async def leer_enlaces_por_categoria(categoria_id: str):
             for enlace in enlaces
         ]
     }
+
+
+    # Ruta para crear un subenlace
+@app.post("/subenlaces/")
+async def crear_subenlace(subenlace: Subenlace):
+    try:
+        # Validar que el enlace_id sea un ObjectId válido
+        if not ObjectId.is_valid(subenlace.enlace_id):
+            raise HTTPException(status_code=400, detail="ID de enlace inválido")
+
+        # Buscar el enlace en la base de datos
+        enlace = await db["enlaces"].find_one({"_id": ObjectId(subenlace.enlace_id)})
+        if not enlace:
+            raise HTTPException(status_code=404, detail="Enlace no encontrado")
+
+        # Crear el nuevo subenlace
+        nuevo_subenlace = {
+            "titulo": subenlace.titulo,
+            "url": subenlace.url,
+            "descripcion": subenlace.descripcion,
+            "enlace_id": ObjectId(subenlace.enlace_id)  # Relacionar con el enlace
+        }
+
+        # Insertar el subenlace en la base de datos
+        result = await db["subenlaces"].insert_one(nuevo_subenlace)
+
+        if not result.inserted_id:
+            raise HTTPException(status_code=500, detail="No se pudo crear el subenlace")
+
+        return {"mensaje": "Subenlace creado exitosamente", "_id": str(result.inserted_id)}
+
+    except Exception as e:
+        print(f"Error al crear subenlace: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+
+# Ruta para obtener los subenlaces de un enlace
+@app.get("/subenlaces/{enlace_id}")
+async def obtener_subenlaces(enlace_id: str):
+    if not ObjectId.is_valid(enlace_id):
+        raise HTTPException(status_code=400, detail="ID de enlace inválido")
+    
+    # Buscar subenlaces asociados al enlace
+    subenlaces = await db["subenlaces"].find({"enlace_id": ObjectId(enlace_id)}).to_list(1000)
+
+    return {
+        "subenlaces": [
+            {
+                "_id": str(subenlace["_id"]),
+                "titulo": subenlace["titulo"],
+                "url": subenlace["url"],
+                "descripcion": subenlace.get("descripcion", "")
+            }
+            for subenlace in subenlaces
+        ]
+    }
+
+# Ruta para actualizar un subenlace
+@app.put("/subenlaces/{subenlace_id}")
+async def actualizar_subenlace(subenlace_id: str, subenlace: Subenlace):
+    try:
+        if not ObjectId.is_valid(subenlace.enlace_id):
+            raise HTTPException(status_code=400, detail="ID de subenlace inválido")
+
+        subenlace_id = ObjectId(subenlace_id)
+
+        # Filtrar solo los campos proporcionados
+        update_data = {k: v for k, v in subenlace.dict().items() if v is not None}
+
+        # Actualizar el subenlace en la base de datos
+        result = await db["subenlaces"].update_one(
+            {"_id": subenlace_id},
+            {"$set": update_data}
+        )
+
+        if result.modified_count == 0:
+            raise HTTPException(status_code=404, detail="Subenlace no encontrado o sin cambios")
+
+        # Obtener el subenlace actualizado
+        subenlace_actualizado = await db["subenlaces"].find_one({"_id": subenlace_id})
+
+        return {
+            "mensaje": "Subenlace actualizado exitosamente",
+            "subenlace": {
+                "_id": str(subenlace_actualizado["_id"]),
+                "titulo": subenlace_actualizado["titulo"],
+                "url": subenlace_actualizado["url"],
+                "descripcion": subenlace_actualizado["descripcion"],
+                "enlace_id": str(subenlace_actualizado["enlace_id"])
+            }
+        }
+
+    except Exception as e:
+        print(f"Error al actualizar subenlace: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")

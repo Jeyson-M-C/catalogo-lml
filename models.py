@@ -13,6 +13,13 @@ class Enlace(BaseModel):
     descripcion: str
     categoria_id: str
 
+class Subenlace(BaseModel):
+    id: str = uuid.uuid4().hex
+    titulo: str
+    url: str
+    descripcion: str
+    enlace_id: str 
+
 class User(BaseModel):
     username: str
     password: str
