@@ -13,8 +13,8 @@ app = FastAPI()
 # Configurar CORS
 
 origins = [
-    "http://localhost:3000",
-    os.getenv("FRONTEND_URL")
+    "http://localhost:3000", # Para desarrollo
+    "https://catalogo-lml.vercel.app/" # Para producción
 ]
 
 app.add_middleware(
