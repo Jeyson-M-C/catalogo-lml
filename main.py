@@ -14,7 +14,7 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000", # Para desarrollo
-    "https://catalogo-lml.vercel.app/" # Para producción
+    "https://catalogo-lml.vercel.app" # Para producción
 ]
 
 app.add_middleware(
