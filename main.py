@@ -7,6 +7,7 @@ from routers.categorias import router as categorias_router
 from routers.enlaces import router as enlaces_router
 from routers.subenlaces import router as subenlaces_router
 from routers.usuarios import router as usuarios_router
+from routers.noticias import router as noticias_router
 
 app = FastAPI()
 
@@ -25,6 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(noticias_router, prefix="/noticias", tags=["noticias"])
 
 app.include_router(usuarios_router, prefix="/usuarios", tags=["usuarios"])
 
